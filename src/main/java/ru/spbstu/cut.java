@@ -6,8 +6,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class cut {
@@ -20,10 +18,10 @@ public class cut {
     @Option(name = "-o", metaVar = "OutputFileName", usage = "Set output file name")
     private File outputFileName;
 
-    @Argument(required = true, metaVar = "Range", usage = "Set range (num-num, -num or num-)")
+    @Option(name = "-r", required = true, metaVar = "Range", usage = "Set range (num-num, -num or num-)")
     private String range;
 
-    @Argument(metaVar = "InputFileName", index = 1, usage = "Set input file name")
+    @Argument(metaVar = "InputFileName", usage = "Set input file name")
     private File inputFileName;
 
     public static void main(String[] args) {
@@ -32,14 +30,21 @@ public class cut {
 
     int startOfRange = 0;
     int endOfRange = 0;
-    public void isCorrect(String range) {
-        if (!Pattern.matches("\\d*-\\d*", range)) {
+
+    public boolean isCorrect(String range) {
+        if (!Pattern.matches("^(\\d*)-(\\d*)$", range) | Pattern.matches("^(-*)$", range)) {
             System.err.println("Use correct format of range: number-number, -number or number-.");
+            return false;
+        } else {
+            String[] strings = range.split("-");
+            startOfRange = (strings[0].equals("")) ? 0 : Integer.parseInt(strings[0]);
+            endOfRange = (strings.length == 1) ? Integer.MAX_VALUE : Integer.parseInt(strings[1]);
+            if (startOfRange > endOfRange) {
+                System.err.println("The start of the range has to be less than the end.");
+                return false;
+            }
+            return true;
         }
-        String[] strings = range.split("-");
-        startOfRange = (strings[0].equals("")) ? 0 : Integer.parseInt(strings[0]);
-        endOfRange = (strings.length == 1) ? Integer.MAX_VALUE : Integer.parseInt(strings[1]);
-        if (startOfRange > endOfRange) { System.err.println("The start of the range has to be less than the end."); }
     }
 
     private void launch(String[] args) {
@@ -53,35 +58,29 @@ public class cut {
             parser.printUsage(System.err);
         }
 
-        if (!(characterIndentation | wordIndentation)) { System.err.println("Use either -c or -w option");}
-        isCorrect(range);
+        if (!(characterIndentation | wordIndentation)) {
+            System.err.println("Use either -c or -w option");
+        }
+        if (!isCorrect(range)) {
+            return;
+        }
         Cutter cutter = new Cutter(startOfRange, endOfRange);
 
         try {
-            String result;
-            if (inputFileName == null) {
-                Scanner input = new Scanner(System.in);
-                System.out.println ("Enter your text. To finish, enter /exit on a new line");
-                ArrayList<String> in = new ArrayList<>();
-                String curStr = "";
-                while (!curStr.equals("/exit")) {
-                    curStr = input.nextLine();
-                    in.add(curStr);
-                }
-                in.remove(in.size() - 1);
-                result = cutter.transformIn(in, characterIndentation);
-            } else {
-                result = cutter.transformInput(inputFileName, characterIndentation);
-            }
-
+            BufferedReader reader;
+            BufferedWriter writer;
             if (outputFileName == null) {
-                System.out.println(result);
+                writer = new BufferedWriter(new OutputStreamWriter(System.out));
             } else {
-                try (FileWriter o = new FileWriter(outputFileName);
-                    BufferedWriter writer = new BufferedWriter(o)) {
-                    writer.write(result);
-                }
+                writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName)));
             }
+            if (inputFileName == null) {
+                reader = new BufferedReader(new InputStreamReader(System.in));
+            } else {
+                reader = new BufferedReader(new FileReader(inputFileName));
+            }
+            cutter.transformInput(reader, characterIndentation, writer);
+            writer.close();
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }

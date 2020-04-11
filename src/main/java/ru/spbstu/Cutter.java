@@ -1,13 +1,12 @@
 package ru.spbstu;
 
 import java.io.*;
-import java.util.ArrayList;
 
 public class Cutter {
     Integer startOfTheRange;
     Integer endOfTheRange;
 
-    public Cutter(int startOfTheRange, int endOfTheRange){
+    public Cutter(int startOfTheRange, int endOfTheRange) {
         this.startOfTheRange = startOfTheRange;
         this.endOfTheRange = endOfTheRange;
     }
@@ -18,7 +17,7 @@ public class Cutter {
         for (int j = startOfTheRange; j <= x; j++) {
             stringBuilder.append(str.charAt(j));
         }
-        stringBuilder.append("\n");
+        stringBuilder.append(System.lineSeparator());
         return stringBuilder.toString();
     }
 
@@ -30,33 +29,24 @@ public class Cutter {
             stringBuilder.append(arr[j]).append(" ");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        stringBuilder.append("\n");
+        stringBuilder.append(System.lineSeparator());
         return stringBuilder.toString();
     }
 
-    public String transformIn(ArrayList<String> strings, boolean flag) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String i: strings) {
-            if (flag) { stringBuilder.append(cutByChars(i)); }
-            else {stringBuilder.append(cutByWords(i)); }
-            }
-        return stringBuilder.toString();
-    }
-
-    public String transformInput(File input, boolean flag) throws IOException {
+    public void transformInput(BufferedReader reader, boolean flag, BufferedWriter writer) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         String curStr;
-        BufferedReader reader;
         try {
-            reader = new BufferedReader((new FileReader(input)));
             while ((curStr = reader.readLine()) != null) {
-                if (flag) { stringBuilder.append(cutByChars(curStr)); }
-                else { stringBuilder.append(cutByWords(curStr)); }
+                if (flag) {
+                    stringBuilder.append(cutByChars(curStr));
+                } else {
+                    stringBuilder.append(cutByWords(curStr));
+                }
             }
-            reader.close();
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-        return stringBuilder.toString();
+        writer.write(stringBuilder.toString());
     }
 }
