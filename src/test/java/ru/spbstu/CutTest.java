@@ -17,7 +17,7 @@ class cutTest {
 
     @Test
     void cutFile() throws IOException {
-        cut.main(new String[]{"-w", "-o", outputFile.toString(), "-r", "-2", inputFile.toString()});
+        Cut.main(new String[]{"-w", "-o", outputFile.toString(), "-r", "-2", inputFile.toString()});
         BufferedReader reader = new BufferedReader(new FileReader(outputFile.toString()));
         String str = reader.readLine();
         assertEquals("Шаганэ ты моя,", str);
@@ -39,21 +39,21 @@ class cutTest {
                 "плеснувши краску из стакана;" + ls + "я показал на блюде студня" + ls +
                 "косые скулы океана.").getBytes());
         System.setIn(in);
-        cut.main(new String[]{"-c", "-r", "1-4"});
+        Cut.main(new String[]{"-c", "-r", "1-4"});
         assertEquals(" сра" + ls + "лесн" + ls + " пок" + ls + "осые" + ls, out.toString());
     }
 
     @Test
     void wrongRange() {
         System.setErr(output);
-        cut.main(new String[]{"-c", "-r", "-"});
+        Cut.main(new String[]{"-c", "-r", "-"});
         assertEquals("Use correct format of range: number-number, -number or number-." + ls, out.toString());
     }
 
     @Test
     void wrongRange2() {
         System.setErr(output);
-        cut.main(new String[]{"-w", "-r", "6-2"});
+        Cut.main(new String[]{"-w", "-r", "6-2"});
         assertEquals("The start of the range has to be less than the end." + ls, out.toString());
     }
 }

@@ -33,17 +33,16 @@ public class Cutter {
         return stringBuilder.toString();
     }
 
-    public void transformInput(BufferedReader reader, boolean flag, BufferedWriter writer) throws IOException {
+    public void transformInput(BufferedReader reader, Cut.Indentation ind, BufferedWriter writer) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         String curStr;
         try {
             while ((curStr = reader.readLine()) != null) {
-                if (flag) {
-                    stringBuilder.append(cutByChars(curStr));
-                } else {
-                    stringBuilder.append(cutByWords(curStr));
+                switch (ind) {
+                    case CHARS: stringBuilder.append(cutByChars(curStr)); break;
+                    case WORDS: stringBuilder.append(cutByWords(curStr)); break;
+                    }
                 }
-            }
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }

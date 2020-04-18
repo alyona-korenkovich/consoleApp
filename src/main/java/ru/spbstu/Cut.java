@@ -8,7 +8,7 @@ import org.kohsuke.args4j.Option;
 import java.io.*;
 import java.util.regex.Pattern;
 
-public class cut {
+public class Cut {
     @Option(name = "-c", metaVar = "IndentC", usage = "Set indentation in characters")
     private boolean characterIndentation;
 
@@ -24,8 +24,13 @@ public class cut {
     @Argument(metaVar = "InputFileName", usage = "Set input file name")
     private File inputFileName;
 
+    enum Indentation {
+        WORDS,
+        CHARS;
+    }
+
     public static void main(String[] args) {
-        new cut().launch(args);
+        new Cut().launch(args);
     }
 
     int startOfRange = 0;
@@ -35,16 +40,15 @@ public class cut {
         if (!Pattern.matches("^(\\d*)-(\\d*)$", range) | Pattern.matches("^(-*)$", range)) {
             System.err.println("Use correct format of range: number-number, -number or number-.");
             return false;
-        } else {
-            String[] strings = range.split("-");
-            startOfRange = (strings[0].equals("")) ? 0 : Integer.parseInt(strings[0]);
-            endOfRange = (strings.length == 1) ? Integer.MAX_VALUE : Integer.parseInt(strings[1]);
-            if (startOfRange > endOfRange) {
-                System.err.println("The start of the range has to be less than the end.");
-                return false;
-            }
-            return true;
         }
+        String[] strings = range.split("-");
+        startOfRange = (strings[0].equals("")) ? 0 : Integer.parseInt(strings[0]);
+        endOfRange = (strings.length == 1) ? Integer.MAX_VALUE : Integer.parseInt(strings[1]);
+        if (startOfRange > endOfRange) {
+            System.err.println("The start of the range has to be less than the end.");
+            return false;
+        }
+        return true;
     }
 
     private void launch(String[] args) {
@@ -65,6 +69,7 @@ public class cut {
             return;
         }
         Cutter cutter = new Cutter(startOfRange, endOfRange);
+        Indentation indentation = (characterIndentation) ? Indentation.CHARS : Indentation.WORDS;
 
         try {
             BufferedReader reader;
@@ -79,7 +84,7 @@ public class cut {
             } else {
                 reader = new BufferedReader(new FileReader(inputFileName));
             }
-            cutter.transformInput(reader, characterIndentation, writer);
+            cutter.transformInput(reader, indentation, writer);
             writer.close();
         } catch (IOException e) {
             System.err.println(e.getMessage());
