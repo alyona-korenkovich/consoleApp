@@ -33,8 +33,8 @@ public class Cut {
         new Cut().launch(args);
     }
 
-    int startOfRange = 0;
-    int endOfRange = 0;
+    private int startOfRange = 0;
+    private int endOfRange = 0;
 
     public boolean isCorrect(String range) {
         if (!Pattern.matches("^(\\d*)-(\\d*)$", range) | Pattern.matches("^(-*)$", range)) {
